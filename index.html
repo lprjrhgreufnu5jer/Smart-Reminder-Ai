@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Home Maintenance Reminder</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f7f7f7;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .navbar {
+      background-color: #4A90E2; /* Soft blue */
+      color: white;
+      text-align: center;
+      padding: 20px 40px;
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .main {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .info-panel {
+      position:static;
+      width: 280px;
+      height: auto;
+      background-color: #f1f1f1; /* Light gray */
+      color: #333;
+      padding: 24px;
+      overflow-y: auto;
+      border-radius: 0 15px 15px 0;
+      margin-top: 80px;
+    }
+
+    .info-panel h2 {
+      margin-top: 0;
+      font-size: 18px;
+      margin-bottom: 12px;
+      color: #4A90E2;
+    }
+
+    .info-panel p {
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .reminder-container {
+      margin-left: 0px;
+      flex: 1;
+      padding: 40px;
+      background-color: #ffffff; /* White background */
+      /* border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); */
+    }
+
+    .reminder-container h2 {
+      margin-top: 0;
+      text-align: center;
+      font-size: 24px;
+      color: #4A90E2;
+    }
+
+    .description {
+      text-align: center;
+      font-size: 14px;
+      color: #6b7280;
+      margin-bottom: 25px;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 12px 14px;
+      margin-top: 12px;
+      border-radius: 8px;
+      font-size: 16px;
+      border: 1px solid #d1d5db;
+      background-color: #f9fafb;
+      color: #374151;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #4A90E2;
+    }
+
+    button {
+      background-color: #4A90E2; /* Soft blue */
+      color: white;
+      font-weight: 500;
+      border: none;
+      transition: background-color 0.3s ease;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #3b7bbf; /* Darker blue */
+    }
+
+    .result {
+      display: none;
+      margin-top: 20px;
+      padding: 16px;
+      background-color: #f1f5f9;
+      border-left: 4px solid #4A90E2;
+      border-radius: 6px;
+      font-size: 15px;
+      line-height: 1.6;
+      color: #374151;
+    }
+
+    .tips {
+      font-size: 13px;
+      color: #6b7280;
+      margin-top: 20px;
+      line-height: 1.5;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 14px;
+      color: #6b7280;
+      border-top: 1px solid #e5e7eb;
+      background-color: #ffffff;
+      margin-left: 280px;
+      border-radius: 0 0 15px 15px;
+    }
+
+    @media (max-width: 768px) {
+      .info-panel {
+        position: static;
+        width: 100%;
+        height: auto;
+      }
+
+      .reminder-container {
+        margin-left: 0;
+      }
+
+      footer {
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    Home Maintenance Reminder
+  </nav>
+
+  <div class="main">
+    <div class="info-panel">
+      <h2>Why Use This?</h2>
+      <p>
+        Keep track of important maintenance tasks like servicing your AC, checking plumbing, and more.
+        Set reminders in advance and stay on top of your home’s health.
+      </p>
+      <p>
+        ✨ Pro Tip: Set seasonal tasks like gutter cleaning in spring or heater inspection before winter.
+      </p>
+    </div>
+
+    <div class="reminder-container">
+      <h2>Set Your Reminder</h2>
+      <p class="description">Stay organized with helpful reminders powered by AI. Just enter your task and choose a date and time!</p>
+
+      <input type="text" id="taskInput" placeholder="e.g., Service the air conditioner">
+      <input type="date" id="dateInput">
+      <input type="time" id="timeInput">
+      <button onclick="setReminder()">Set Reminder</button>
+
+      <div id="response" class="result"></div>
+
+      <div class="tips">
+        💡 Tip: Be specific when describing your task. The assistant may even give helpful advice!
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Project by <strong>Vikas</strong> • Submitted to <strong>Dr. Syed Abdul Basit Andrabi</strong> • April 2025
+  </footer>
+
+  <script>
+    const API_KEY = "AIzaSyBJvhPW1ZSldEsWcGoNwgN4LuarfBPtnXY";
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+
+    function formatDate(dateStr) {
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      return new Date(dateStr).toLocaleDateString(undefined, options);
+    }
+
+    async function setReminder() {
+      const task = document.getElementById("taskInput").value.trim();
+      const date = document.getElementById("dateInput").value;
+      const time = document.getElementById("timeInput").value;
+      const responseBox = document.getElementById("response");
+
+      if (!task || !date || !time) {
+        responseBox.style.display = "block";
+        responseBox.innerText = "⚠️ Please enter task, date, and time.";
+        return;
+      }
+
+      const readableDate = formatDate(date);
+      const prompt = `You are a smart assistant. The user wants a reminder for the task: "${task}" on ${readableDate} at ${time}. 
+Respond with a polite, helpful confirmation that includes:
+1. Confirmation the reminder is set.
+2. The task and the readable date and time.
+3. A helpful or thoughtful suggestion related to the task, if possible.`;
+
+      const requestBody = {
+        contents: [{ parts: [{ text: prompt }] }]
+      };
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestBody)
+        });
+
+        const data = await res.json();
+        const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "❌ Couldn't generate a response.";
+        responseBox.style.display = "block";
+        responseBox.innerText = aiText;
+      } catch (error) {
+        responseBox.style.display = "block";
+        responseBox.innerText = "❌ Error connecting to AI. Please try again.";
+        console.error(error);
+      }
+    }
+  </script>
+
+</body>
+</html>
